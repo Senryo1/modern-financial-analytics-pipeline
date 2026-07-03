@@ -1,0 +1,4 @@
+loan_id,customer_id,product_id,branch_id,advisor_id,disbursement_date,loan_amount,loan_term_months,loan_status
+L001,C001,P001,B001,A001,2023-01-15,15000,12,Active
+L002,C002,P002,B002,A002,2023-02-10,45000,24,Active
+L003,C003,P003,B003,A003,2023-03-05,8000,10,Closed
