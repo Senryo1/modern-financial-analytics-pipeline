@@ -15,7 +15,6 @@ Generated files:
 Output folder:
 - data/raw/
 """
-
 from pathlib import Path
 from datetime import datetime, timedelta
 import random

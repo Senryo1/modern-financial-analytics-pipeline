@@ -1,0 +1,6 @@
+product_id,product_name,product_type,interest_rate
+P001,Microloan Working Capital,Loan,0.18
+P002,Small Business Loan,Loan,0.15
+P003,Consumer Loan,Loan,0.22
+P004,Agricultural Loan,Loan,0.16
+P005,Women Entrepreneur Loan,Loan,0.14
