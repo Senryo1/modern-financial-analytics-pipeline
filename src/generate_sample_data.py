@@ -27,9 +27,10 @@ import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 RAW_DATA_DIR = BASE_DIR / "data" / "raw"
+SAMPLE_DATA_DIR = BASE_DIR / "data" / "sample"
 
 RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
-
+SAMPLE_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # -------------------------------------------------------------------
 # Configuration
@@ -58,6 +59,13 @@ def save_csv(df: pd.DataFrame, filename: str) -> None:
     output_path = RAW_DATA_DIR / filename
     df.to_csv(output_path, index=False, encoding="utf-8")
     print(f"Created: {output_path}")
+
+def save_sample_csv(df: pd.DataFrame, filename: str, sample_size: int = 10) -> None:
+    """Save a small sample DataFrame to the sample data folder."""
+    output_path = SAMPLE_DATA_DIR / filename
+    sample_df = df.head(sample_size)
+    sample_df.to_csv(output_path, index=False, encoding="utf-8")
+    print(f"Created sample: {output_path}")
 
 
 # -------------------------------------------------------------------
@@ -288,6 +296,7 @@ def main() -> None:
     customers = generate_customers()
     loans = generate_loans(customers, branches, advisors, products)
     payments = generate_payments(loans)
+    
 
     save_csv(branches, "branches.csv")
     save_csv(advisors, "advisors.csv")
@@ -295,6 +304,12 @@ def main() -> None:
     save_csv(customers, "customers.csv")
     save_csv(loans, "loans.csv")
     save_csv(payments, "payments.csv")
+    save_sample_csv(branches, "branches_sample.csv")
+    save_sample_csv(advisors, "advisors_sample.csv")
+    save_sample_csv(products, "products_sample.csv")
+    save_sample_csv(customers, "customers_sample.csv")
+    save_sample_csv(loans, "loans_sample.csv")
+    save_sample_csv(payments, "payments_sample.csv")
 
     print("Sample data generation completed successfully.")
 

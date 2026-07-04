@@ -1,0 +1,11 @@
+customer_id,customer_name,gender,birth_date,registration_date,city,customer_segment
+C001,Ricardo Lopez,F,2002-02-13,2023-09-15,Mixco,Small Business
+C002,Valeria Gomez,F,1977-02-28,2023-09-28,Villa Nueva,Small Business
+C003,Sofia Castillo,M,1974-08-02,2020-01-15,Antigua Guatemala,Individual
+C004,Fernando Rojas,M,1971-12-13,2024-02-25,Quetzaltenango,Individual
+C005,Diana Garcia,M,1998-03-14,2023-01-21,Quetzaltenango,Individual
+C006,Maria Mendez,F,1982-12-25,2019-11-23,Chimaltenango,Individual
+C007,Luis Flores,M,1990-05-04,2023-02-03,Mixco,Small Business
+C008,Fernando Castillo,M,2001-06-25,2019-10-20,Quetzaltenango,Microenterprise
+C009,Jorge Cruz,F,1977-05-01,2024-03-08,Antigua Guatemala,Small Business
+C010,Manuel Perez,M,1972-07-05,2021-07-27,Chimaltenango,Individual
