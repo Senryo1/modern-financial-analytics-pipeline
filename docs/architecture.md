@@ -1,4 +1,3 @@
-
 # Project Architecture
 
 ## Initial Data Workflow
