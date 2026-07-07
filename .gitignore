@@ -25,3 +25,7 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Validation outputs
+data/validation/*
+!data/validation/.gitkeep
