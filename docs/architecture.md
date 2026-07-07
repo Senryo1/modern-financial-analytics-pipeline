@@ -155,7 +155,16 @@ Validation categories:
 - Referential integrity
 - Business rule consistency
 
+Validation outputs:
+
+```text
+data/validation/validation_summary.csv
+data/validation/validation_details.csv
+```
+
 Design rationale:
+
+Validation results are saved as structured output files to support auditability, review, and future integration with dashboards, orchestration tools, or automated quality monitoring.
 
 Python validation provides a flexible programmatic layer to identify data quality issues before analytical modeling and reporting.
 

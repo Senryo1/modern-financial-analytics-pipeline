@@ -240,6 +240,20 @@ Validation categories:
 - Referential integrity
 - Business rule consistency
 
+Validation outputs:
+
+```text
+data/validation/validation_summary.csv
+data/validation/validation_details.csv
+```
+
+The validation summary provides one row per validation check, including status, dataset name, failed record count, and description.
+
+The validation details file stores failed records when validation issues are detected.
+
+These outputs are generated locally and are not versioned in GitHub because they can be recreated by running the validation script.
+
+
 ---
 
 ## SQL Scripts
@@ -396,10 +410,18 @@ Ignored folders:
 data/raw/
 data/processed/
 ```
+24
+Reason:
+
+These files are generate0d outputs and can be recreated by running the pipeline scripts.
+
+```text
+data/validation/
+```
 
 Reason:
 
-These files are generated outputs and can be recreated by running the pipeline scripts.
+Validation output files are generated artifacts and can be recreated by running `src/validate.py`.
 
 Versioned sample files:
 
