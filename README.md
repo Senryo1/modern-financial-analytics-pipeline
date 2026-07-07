@@ -1,157 +1,484 @@
-# modern-financial-analytics-pipeline
-Repository to create a financial project for modern criteria and techniques
-
 # Modern Financial Analytics Pipeline
 
 ## Project Overview
 
-This project demonstrates a modern data analytics pipeline for a financial or microfinance business scenario. The goal is to transform raw operational data into clean, validated, analytics-ready datasets that can support executive reporting, portfolio monitoring, and business decision-making.
+This project demonstrates a modern data analytics pipeline for a financial or microfinance business scenario.
+
+The goal is to transform raw operational data into clean, validated, analytics-ready datasets that can support executive reporting, portfolio monitoring, data quality checks, and business decision-making.
+
+This project is designed as a professional portfolio project focused on:
+
+- Data Engineering
+- Analytics Engineering
+- Data Quality
+- Financial Analytics
+- SQL Analytics
+- Python-based data processing
+- Technical documentation
+- Business rule validation
+
+---
 
 ## Business Context
 
-Financial institutions often manage customer, loan, payment, branch, advisor, and product data across different systems. When this information is inconsistent, manually processed, or poorly documented, reporting becomes slow, unreliable, and difficult to scale.
+Financial and microfinance institutions often manage customer, loan, payment, branch, advisor, and product data across different systems.
 
-This project simulates that scenario and provides a structured data workflow focused on:
+When this information is inconsistent, manually processed, or poorly documented, reporting becomes slow, unreliable, and difficult to scale.
 
-* Data cleaning
-* Data validation
-* Data quality checks
-* Analytical modeling
-* Executive reporting
-* Technical documentation
+This project simulates that scenario and builds a structured workflow to move data from raw operational files into validated, analytics-ready datasets.
 
-## Target Professional Skills
+---
 
-This project is designed to demonstrate practical skills in:
+## Project Objectives
 
-* SQL
-* Python for data engineering
-* Data quality validation
-* Analytics engineering
-* Financial reporting
-* Power BI
-* Technical documentation
-* Modern data workflow design
+The main objectives of this project are:
 
-## Initial Architecture
+1. Generate realistic simulated financial datasets.
+2. Organize data into raw, processed, and sample layers.
+3. Clean and standardize datasets using Python.
+4. Validate data quality using Python.
+5. Document SQL-based data quality checks.
+6. Build analytical SQL queries for reporting.
+7. Document data architecture, business rules, and field definitions.
+8. Prepare the foundation for a future Power BI dashboard, dbt project, and cloud data warehouse implementation.
 
-Raw Data → Python Cleaning → SQL Validation → Analytics Models → Power BI Dashboard → Documentation
+---
+
+## High-Level Architecture
+
+```text
+Sample Data Generation
+        ↓
+Raw Data Layer
+        ↓
+Python Transformation Layer
+        ↓
+Processed Data Layer
+        ↓
+Python Data Quality Validation
+        ↓
+SQL Data Quality Checks
+        ↓
+SQL Analytics Queries
+        ↓
+Power BI / Reporting Layer
+        ↓
+Technical Documentation
+```
+
+---
 
 ## Repository Structure
 
 ```text
-data/
-src/
-sql/
-docs/
-dashboards/
+modern-financial-analytics-pipeline/
+│
+├── README.md
+├── requirements.txt
+├── .gitignore
+│
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── sample/
+│
+├── src/
+│   ├── generate_sample_data.py
+│   ├── extract.py
+│   ├── transform.py
+│   └── validate.py
+│
+├── sql/
+│   ├── data_quality_checks.sql
+│   └── analytics_queries.sql
+│
+├── docs/
+│   ├── architecture.md
+│   ├── data_dictionary.md
+│   ├── business_rules.md
+│   └── code_walkthrough.md
+│
+└── dashboards/
+    └── powerbi/
 ```
 
-## Folder Description
+---
 
-### data/
+## Data Model
 
-Contains the project datasets.
+The project simulates a simplified financial analytics data model.
 
-* `raw/`: original source data.
-* `processed/`: cleaned and transformed data.
-* `sample/`: small sample files used for testing and documentation.
+| Dataset | Description |
+|---|---|
+| `customers` | Customer master data |
+| `branches` | Branch or agency information |
+| `advisors` | Credit advisor information |
+| `products` | Financial product catalog |
+| `loans` | Loan portfolio data |
+| `payments` | Loan payment transaction data |
 
-### src/
+---
 
-Contains Python scripts used for extraction, transformation, and validation.
+## Main Relationships
 
-Planned scripts:
+| Child Dataset | Child Field | Parent Dataset | Parent Field |
+|---|---|---|---|
+| `loans` | `customer_id` | `customers` | `customer_id` |
+| `loans` | `product_id` | `products` | `product_id` |
+| `loans` | `branch_id` | `branches` | `branch_id` |
+| `loans` | `advisor_id` | `advisors` | `advisor_id` |
+| `advisors` | `branch_id` | `branches` | `branch_id` |
+| `payments` | `loan_id` | `loans` | `loan_id` |
 
-* `extract.py`
-* `transform.py`
-* `validate.py`
+---
 
-### sql/
+## Current Pipeline Status
 
-Contains SQL scripts for data quality checks, analytical queries, and business validations.
+| Layer | Status |
+|---|---|
+| Repository setup | Completed |
+| Sample data generation | Completed |
+| Raw data layer | Completed |
+| Sample data for portfolio review | Completed |
+| Python transformation | Completed |
+| Processed data layer | Completed |
+| Python validation | Completed |
+| SQL data quality checks | Completed |
+| SQL analytics queries | Completed |
+| Technical documentation | Completed |
+| Power BI dashboard | Pending |
+| dbt models | Future phase |
+| Snowflake/cloud warehouse | Future phase |
+| Airflow orchestration | Future phase |
+| Docker environment | Future phase |
 
-Planned files:
-
-* `data_quality_checks.sql`
-* `analytics_queries.sql`
-
-### docs/
-
-Contains technical and business documentation.
-
-Planned documents:
-
-* `architecture.md`
-* `data_dictionary.md`
-* `business_rules.md`
-
-### dashboards/
-
-Contains Power BI dashboard files, screenshots, and dashboard documentation.
-
-## Current Status
-
-This project is currently in the initial setup phase. The first version will include:
-
-* Sample financial datasets
-* Python data cleaning scripts
-* SQL data quality checks
-* Technical documentation
-* Initial analytics model
-* Power BI dashboard prototype
-
-## Planned Development Phases
-
-### Phase 1: Repository Setup
-
-Create the initial repository structure, README documentation, and project folders.
-
-### Phase 2: Sample Data Creation
-
-Create simulated financial datasets for customers, loans, payments, branches, advisors, and financial products.
-
-### Phase 3: Python Data Processing
-
-Build Python scripts to clean, transform, and validate raw data.
-
-### Phase 4: SQL Data Quality Checks
-
-Create SQL scripts to identify missing values, duplicates, invalid records, inconsistent dates, and business rule violations.
-
-### Phase 5: Analytics Modeling
-
-Design analytics-ready tables to support financial reporting and portfolio monitoring.
-
-### Phase 6: Power BI Dashboard
-
-Create an executive dashboard focused on portfolio performance, delinquency, recovery, monthly trends, branch performance, and advisor performance.
-
-### Phase 7: Documentation
-
-Document the architecture, data dictionary, business rules, validation logic, and dashboard KPIs.
+---
 
 ## Tools and Technologies
 
-Planned tools and technologies:
+Current tools:
 
-* Python
-* SQL
-* GitHub
-* Power BI
-* dbt
-* Snowflake
-* Data quality checks
-* Technical documentation
+- Python
+- pandas
+- SQL
+- Git
+- GitHub
+- Markdown
+- Power BI planned
+
+Future tools:
+
+- dbt
+- Snowflake or another cloud data warehouse
+- Airflow
+- Docker
+- GitHub Actions
+
+---
+
+## Python Scripts
+
+### `src/generate_sample_data.py`
+
+Generates simulated financial and microfinance datasets.
+
+Outputs:
+
+```text
+data/raw/customers.csv
+data/raw/branches.csv
+data/raw/advisors.csv
+data/raw/products.csv
+data/raw/loans.csv
+data/raw/payments.csv
+```
+
+It also creates smaller visible sample files under:
+
+```text
+data/sample/
+```
+
+These sample files are included in GitHub so reviewers can inspect the data structure without running the full pipeline.
+
+---
+
+### `src/transform.py`
+
+Reads raw datasets from:
+
+```text
+data/raw/
+```
+
+and writes cleaned datasets to:
+
+```text
+data/processed/
+```
+
+Main transformation logic:
+
+- Standardizes column names.
+- Trims text values.
+- Converts date fields.
+- Converts numeric fields.
+- Saves processed datasets.
+
+---
+
+### `src/validate.py`
+
+Runs Python-based data quality validations on processed datasets.
+
+Validation categories:
+
+- Missing values
+- Duplicate primary keys
+- Allowed categorical values
+- Positive and non-negative numeric values
+- Referential integrity
+- Business rule consistency
+
+---
+
+## SQL Scripts
+
+### `sql/data_quality_checks.sql`
+
+Contains SQL-based data quality checks.
+
+The logic is:
+
+```text
+If a query returns rows, those records should be reviewed.
+If a query returns zero rows, the validation passes.
+```
+
+Validation areas:
+
+- Primary key duplicates
+- Critical null values
+- Invalid numeric values
+- Invalid categorical values
+- Referential integrity
+- Business rule violations
+- Financial consistency checks
+
+---
+
+### `sql/analytics_queries.sql`
+
+Contains analytical SQL queries for financial and microfinance reporting.
+
+Analysis areas:
+
+- Executive portfolio KPIs
+- Loan portfolio by status
+- Payment behavior
+- Branch performance
+- Advisor performance
+- Product performance
+- Customer segment analysis
+- Monthly trends
+- Recovery analysis
+- Power BI-ready datasets
+
+---
+
+## Documentation
+
+The project includes technical and business documentation under the `docs/` folder.
+
+| Document | Purpose |
+|---|---|
+| `architecture.md` | Explains the project architecture and pipeline layers |
+| `data_dictionary.md` | Describes datasets, fields, relationships, and analytical grain |
+| `business_rules.md` | Documents data quality and business validation rules |
+| `code_walkthrough.md` | Explains the logic and design decisions behind the code |
+
+---
+
+## How to Run the Project
+
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd modern-financial-analytics-pipeline
+```
+
+---
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+or, on Windows:
+
+```bash
+py -m pip install -r requirements.txt
+```
+
+---
+
+### 3. Generate sample raw data
+
+```bash
+python src/generate_sample_data.py
+```
+
+or:
+
+```bash
+py src/generate_sample_data.py
+```
+
+This generates full raw datasets under:
+
+```text
+data/raw/
+```
+
+and small review samples under:
+
+```text
+data/sample/
+```
+
+---
+
+### 4. Transform raw data
+
+```bash
+python src/transform.py
+```
+
+or:
+
+```bash
+py src/transform.py
+```
+
+This generates processed datasets under:
+
+```text
+data/processed/
+```
+
+---
+
+### 5. Run data quality validations
+
+```bash
+python src/validate.py
+```
+
+or:
+
+```bash
+py src/validate.py
+```
+
+Validation results are printed in the terminal.
+
+---
+
+## Versioning Strategy
+
+The project intentionally does not version generated raw or processed files.
+
+Ignored folders:
+
+```text
+data/raw/
+data/processed/
+```
+
+Reason:
+
+These files are generated outputs and can be recreated by running the pipeline scripts.
+
+Versioned sample files:
+
+```text
+data/sample/
+```
+
+Reason:
+
+Small sample files are included so that reviewers can inspect the structure of the generated data directly in GitHub.
+
+---
+
+## Key Data Quality Rules
+
+Examples of implemented validation rules:
+
+- Customer IDs must be unique.
+- Loan IDs must be unique.
+- Payment IDs must be unique.
+- Loan amounts must be greater than zero.
+- Payment amounts cannot be negative.
+- Days late cannot be negative.
+- Every loan must reference a valid customer.
+- Every loan must reference a valid product.
+- Every loan must reference a valid branch.
+- Every loan must reference a valid advisor.
+- Every payment must reference a valid loan.
+- Payments cannot occur before loan disbursement.
+- Missed payments must have zero payment amount.
+- Paid payments must have zero days late.
+
+---
+
+## Professional Skills Demonstrated
+
+This project demonstrates practical skills in:
+
+- Python-based data processing
+- Data pipeline design
+- SQL data quality checks
+- SQL analytical queries
+- Financial data modeling
+- Data quality validation
+- Referential integrity checks
+- Business rule documentation
+- Technical documentation
+- Git and GitHub workflow
+- Portfolio project structuring
+
+---
+
+## Future Improvements
+
+Planned improvements include:
+
+1. Add a database loading layer.
+2. Load processed data into SQL Server, PostgreSQL, or Snowflake.
+3. Convert transformation logic into dbt models.
+4. Add dbt tests and documentation.
+5. Build a Power BI dashboard.
+6. Add validation reports as CSV outputs.
+7. Add Airflow orchestration.
+8. Add Docker for reproducible execution.
+9. Add GitHub Actions for automated validation.
+10. Add AI-assisted documentation or data quality summaries.
+
+---
 
 ## Professional Purpose
 
-This project is part of my professional transition toward modern Data Engineering, Analytics Engineering, Cloud Analytics, and Data & AI Consulting.
+This project is part of a professional transition toward modern Data Engineering, Analytics Engineering, Cloud Analytics, and Data & AI Consulting.
 
 The objective is to demonstrate how financial data can be transformed into reliable, documented, and business-ready analytics solutions.
 
+---
+
 ## Author
 
-Rene Garcia-Salas
+Rene Garcia-Salas  
 Bilingual Data & Analytics Professional
 
