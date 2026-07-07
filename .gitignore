@@ -29,3 +29,7 @@ Thumbs.db
 # Validation outputs
 data/validation/*
 !data/validation/.gitkeep
+
+# Local database outputs
+data/database/*
+!data/database/.gitkeep
