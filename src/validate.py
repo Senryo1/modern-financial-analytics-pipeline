@@ -1,4 +1,3 @@
-
 """
 validate.py
 
@@ -10,6 +9,8 @@ Input folder:
 
 Validation output:
 - Prints validation results in the terminal.
+- Saves validation summary to data/validation/validation_summary.csv.
+- Saves failed record details to data/validation/validation_details.csv.
 """
 
 from pathlib import Path
@@ -22,6 +23,17 @@ import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 PROCESSED_DATA_DIR = BASE_DIR / "data" / "processed"
+VALIDATION_DATA_DIR = BASE_DIR / "data" / "validation"
+
+VALIDATION_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# -------------------------------------------------------------------
+# Validation result containers
+# -------------------------------------------------------------------
+
+validation_summary: list[dict] = []
+validation_details: list[pd.DataFrame] = []
 
 
 # -------------------------------------------------------------------
@@ -45,9 +57,60 @@ def print_section(title: str) -> None:
     print("=" * 80)
 
 
-def print_result(status: str, message: str) -> None:
-    """Print a standardized validation result."""
-    print(f"{status}: {message}")
+def register_validation_result(
+    check_name: str,
+    dataset_name: str,
+    status: str,
+    records_failed: int,
+    description: str,
+    failed_records: pd.DataFrame | None = None
+) -> None:
+    """
+    Register validation result in summary and optionally store failed records.
+
+    This function centralizes how validation outcomes are recorded.
+    It allows every validation function to follow the same reporting structure.
+    """
+    validation_summary.append({
+        "check_name": check_name,
+        "dataset_name": dataset_name,
+        "status": status,
+        "records_failed": records_failed,
+        "description": description,
+    })
+
+    print(f"{status}: {description}")
+
+    if failed_records is not None and not failed_records.empty:
+        detail_df = failed_records.copy()
+        detail_df.insert(0, "dataset_name", dataset_name)
+        detail_df.insert(0, "check_name", check_name)
+        validation_details.append(detail_df)
+
+
+def save_validation_outputs() -> None:
+    """Save validation summary and failed record details to CSV files."""
+    summary_df = pd.DataFrame(validation_summary)
+
+    summary_output_path = VALIDATION_DATA_DIR / "validation_summary.csv"
+    details_output_path = VALIDATION_DATA_DIR / "validation_details.csv"
+
+    summary_df.to_csv(summary_output_path, index=False, encoding="utf-8")
+
+    if validation_details:
+        details_df = pd.concat(validation_details, ignore_index=True)
+    else:
+        details_df = pd.DataFrame(columns=[
+            "check_name",
+            "dataset_name",
+            "message"
+        ])
+
+    details_df.to_csv(details_output_path, index=False, encoding="utf-8")
+
+    print("\nValidation output files created:")
+    print(f"- {summary_output_path}")
+    print(f"- {details_output_path}")
 
 
 # -------------------------------------------------------------------
@@ -56,16 +119,35 @@ def print_result(status: str, message: str) -> None:
 
 def check_missing_values(df: pd.DataFrame, dataset_name: str) -> None:
     """Check missing values by column."""
-    print_section(f"Missing Values Check - {dataset_name}")
+    check_name = "Missing Values Check"
+    print_section(f"{check_name} - {dataset_name}")
 
     missing_values = df.isna().sum()
     missing_values = missing_values[missing_values > 0]
 
     if missing_values.empty:
-        print_result("PASS", "No missing values found.")
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="PASS",
+            records_failed=0,
+            description="No missing values found."
+        )
     else:
-        print_result("WARNING", "Missing values found:")
-        print(missing_values)
+        failed_records = (
+            missing_values
+            .reset_index()
+            .rename(columns={"index": "column_name", 0: "missing_count"})
+        )
+
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="WARNING",
+            records_failed=len(failed_records),
+            description="Missing values found in one or more columns.",
+            failed_records=failed_records
+        )
 
 
 def check_duplicates(
@@ -74,15 +156,28 @@ def check_duplicates(
     key_columns: list[str]
 ) -> None:
     """Check duplicated records based on selected key columns."""
-    print_section(f"Duplicate Check - {dataset_name}")
+    check_name = "Duplicate Check"
+    print_section(f"{check_name} - {dataset_name}")
 
     duplicated_records = df[df.duplicated(subset=key_columns, keep=False)]
 
     if duplicated_records.empty:
-        print_result("PASS", f"No duplicates found based on {key_columns}.")
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="PASS",
+            records_failed=0,
+            description=f"No duplicates found based on {key_columns}."
+        )
     else:
-        print_result("WARNING", f"Duplicate records found based on {key_columns}:")
-        print(duplicated_records)
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="WARNING",
+            records_failed=len(duplicated_records),
+            description=f"Duplicate records found based on {key_columns}.",
+            failed_records=duplicated_records
+        )
 
 
 def check_allowed_values(
@@ -92,15 +187,28 @@ def check_allowed_values(
     allowed_values: list[str]
 ) -> None:
     """Check that a column only contains expected categorical values."""
-    print_section(f"Allowed Values Check - {dataset_name}.{column}")
+    check_name = "Allowed Values Check"
+    print_section(f"{check_name} - {dataset_name}.{column}")
 
     invalid_records = df[~df[column].isin(allowed_values)]
 
     if invalid_records.empty:
-        print_result("PASS", f"All values in {column} are valid.")
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="PASS",
+            records_failed=0,
+            description=f"All values in {column} are valid."
+        )
     else:
-        print_result("WARNING", f"Invalid values found in {column}:")
-        print(invalid_records)
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="WARNING",
+            records_failed=len(invalid_records),
+            description=f"Invalid values found in {column}.",
+            failed_records=invalid_records
+        )
 
 
 def check_positive_values(
@@ -109,15 +217,28 @@ def check_positive_values(
     column: str
 ) -> None:
     """Check that selected numeric column has positive values."""
-    print_section(f"Positive Value Check - {dataset_name}.{column}")
+    check_name = "Positive Value Check"
+    print_section(f"{check_name} - {dataset_name}.{column}")
 
     invalid_records = df[df[column] <= 0]
 
     if invalid_records.empty:
-        print_result("PASS", f"All values in {column} are positive.")
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="PASS",
+            records_failed=0,
+            description=f"All values in {column} are positive."
+        )
     else:
-        print_result("WARNING", f"Non-positive values found in {column}:")
-        print(invalid_records)
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="WARNING",
+            records_failed=len(invalid_records),
+            description=f"Non-positive values found in {column}.",
+            failed_records=invalid_records
+        )
 
 
 def check_non_negative_values(
@@ -126,15 +247,28 @@ def check_non_negative_values(
     column: str
 ) -> None:
     """Check that selected numeric column has non-negative values."""
-    print_section(f"Non-Negative Value Check - {dataset_name}.{column}")
+    check_name = "Non-Negative Value Check"
+    print_section(f"{check_name} - {dataset_name}.{column}")
 
     invalid_records = df[df[column] < 0]
 
     if invalid_records.empty:
-        print_result("PASS", f"All values in {column} are non-negative.")
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="PASS",
+            records_failed=0,
+            description=f"All values in {column} are non-negative."
+        )
     else:
-        print_result("WARNING", f"Negative values found in {column}:")
-        print(invalid_records)
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="WARNING",
+            records_failed=len(invalid_records),
+            description=f"Negative values found in {column}.",
+            failed_records=invalid_records
+        )
 
 
 def check_referential_integrity(
@@ -145,17 +279,30 @@ def check_referential_integrity(
     relationship_name: str
 ) -> None:
     """Check that child table keys exist in the parent table."""
-    print_section(f"Referential Integrity Check - {relationship_name}")
+    check_name = "Referential Integrity Check"
+    print_section(f"{check_name} - {relationship_name}")
 
     invalid_records = child_df[
         ~child_df[child_column].isin(parent_df[parent_column])
     ]
 
     if invalid_records.empty:
-        print_result("PASS", f"All {child_column} values exist in parent table.")
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=relationship_name,
+            status="PASS",
+            records_failed=0,
+            description=f"All {child_column} values exist in parent table."
+        )
     else:
-        print_result("WARNING", f"Invalid foreign keys found in {child_column}:")
-        print(invalid_records)
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=relationship_name,
+            status="WARNING",
+            records_failed=len(invalid_records),
+            description=f"Invalid foreign keys found in {child_column}.",
+            failed_records=invalid_records
+        )
 
 
 # -------------------------------------------------------------------
@@ -167,7 +314,9 @@ def check_payment_dates_after_disbursement(
     loans: pd.DataFrame
 ) -> None:
     """Check that payment dates are not before loan disbursement dates."""
-    print_section("Business Rule Check - Payment Date After Disbursement Date")
+    check_name = "Payment Date After Disbursement Date Check"
+    dataset_name = "payments_loans"
+    print_section(check_name)
 
     merged_df = payments.merge(
         loans[["loan_id", "disbursement_date"]],
@@ -190,18 +339,29 @@ def check_payment_dates_after_disbursement(
     ]
 
     if invalid_records.empty:
-        print_result(
-            "PASS",
-            "All payment dates are on or after disbursement dates."
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="PASS",
+            records_failed=0,
+            description="All payment dates are on or after disbursement dates."
         )
     else:
-        print_result("WARNING", "Payments before disbursement date found:")
-        print(invalid_records)
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="WARNING",
+            records_failed=len(invalid_records),
+            description="Payments before disbursement date found.",
+            failed_records=invalid_records
+        )
 
 
 def check_missed_payments_have_zero_amount(payments: pd.DataFrame) -> None:
     """Check that missed payments have zero payment amount."""
-    print_section("Business Rule Check - Missed Payments Have Zero Amount")
+    check_name = "Missed Payments Have Zero Amount Check"
+    dataset_name = "payments"
+    print_section(check_name)
 
     invalid_records = payments[
         (payments["payment_status"] == "Missed")
@@ -209,15 +369,29 @@ def check_missed_payments_have_zero_amount(payments: pd.DataFrame) -> None:
     ]
 
     if invalid_records.empty:
-        print_result("PASS", "All missed payments have zero payment amount.")
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="PASS",
+            records_failed=0,
+            description="All missed payments have zero payment amount."
+        )
     else:
-        print_result("WARNING", "Missed payments with non-zero amount found:")
-        print(invalid_records)
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="WARNING",
+            records_failed=len(invalid_records),
+            description="Missed payments with non-zero amount found.",
+            failed_records=invalid_records
+        )
 
 
 def check_paid_payments_have_zero_days_late(payments: pd.DataFrame) -> None:
     """Check that paid payments are not late."""
-    print_section("Business Rule Check - Paid Payments Have Zero Days Late")
+    check_name = "Paid Payments Have Zero Days Late Check"
+    dataset_name = "payments"
+    print_section(check_name)
 
     invalid_records = payments[
         (payments["payment_status"] == "Paid")
@@ -225,10 +399,52 @@ def check_paid_payments_have_zero_days_late(payments: pd.DataFrame) -> None:
     ]
 
     if invalid_records.empty:
-        print_result("PASS", "All paid payments have zero days late.")
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="PASS",
+            records_failed=0,
+            description="All paid payments have zero days late."
+        )
     else:
-        print_result("WARNING", "Paid payments with days_late greater than zero found:")
-        print(invalid_records)
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="WARNING",
+            records_failed=len(invalid_records),
+            description="Paid payments with days_late greater than zero found.",
+            failed_records=invalid_records
+        )
+
+
+def check_late_payments_have_positive_days_late(payments: pd.DataFrame) -> None:
+    """Check that late payments have days_late greater than zero."""
+    check_name = "Late Payments Have Positive Days Late Check"
+    dataset_name = "payments"
+    print_section(check_name)
+
+    invalid_records = payments[
+        (payments["payment_status"] == "Late")
+        & (payments["days_late"] <= 0)
+    ]
+
+    if invalid_records.empty:
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="PASS",
+            records_failed=0,
+            description="All late payments have positive days late."
+        )
+    else:
+        register_validation_result(
+            check_name=check_name,
+            dataset_name=dataset_name,
+            status="WARNING",
+            records_failed=len(invalid_records),
+            description="Late payments with zero or negative days_late found.",
+            failed_records=invalid_records
+        )
 
 
 # -------------------------------------------------------------------
@@ -285,7 +501,7 @@ def main() -> None:
         customers,
         "customer_id",
         "customer_id",
-        "loans.customer_id → customers.customer_id"
+        "loans.customer_id -> customers.customer_id"
     )
 
     check_referential_integrity(
@@ -293,7 +509,7 @@ def main() -> None:
         products,
         "product_id",
         "product_id",
-        "loans.product_id → products.product_id"
+        "loans.product_id -> products.product_id"
     )
 
     check_referential_integrity(
@@ -301,7 +517,7 @@ def main() -> None:
         branches,
         "branch_id",
         "branch_id",
-        "loans.branch_id → branches.branch_id"
+        "loans.branch_id -> branches.branch_id"
     )
 
     check_referential_integrity(
@@ -309,7 +525,7 @@ def main() -> None:
         advisors,
         "advisor_id",
         "advisor_id",
-        "loans.advisor_id → advisors.advisor_id"
+        "loans.advisor_id -> advisors.advisor_id"
     )
 
     check_referential_integrity(
@@ -317,7 +533,7 @@ def main() -> None:
         branches,
         "branch_id",
         "branch_id",
-        "advisors.branch_id → branches.branch_id"
+        "advisors.branch_id -> branches.branch_id"
     )
 
     check_referential_integrity(
@@ -325,13 +541,16 @@ def main() -> None:
         loans,
         "loan_id",
         "loan_id",
-        "payments.loan_id → loans.loan_id"
+        "payments.loan_id -> loans.loan_id"
     )
 
     # Business rule validations
     check_payment_dates_after_disbursement(payments, loans)
     check_missed_payments_have_zero_amount(payments)
     check_paid_payments_have_zero_days_late(payments)
+    check_late_payments_have_positive_days_late(payments)
+
+    save_validation_outputs()
 
     print("\nData quality validation process completed.")
 
