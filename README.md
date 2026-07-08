@@ -255,6 +255,68 @@ These outputs are generated locally and are not versioned in GitHub because they
 
 
 ---
+### `src/load_to_sqlite.py`
+
+Loads processed datasets into a local SQLite database.
+
+Input:
+
+```text
+data/processed/
+```
+
+Output:
+
+```text
+data/database/financial_analytics.db
+```
+
+Purpose:
+
+This script creates a lightweight local database layer so the processed datasets can be queried as relational tables.
+
+Loaded tables:
+
+- `customers`
+- `branches`
+- `advisors`
+- `products`
+- `loans`
+- `payments`
+
+The generated SQLite database is not versioned in GitHub because it can be recreated by running the pipeline.
+
+---
+
+### `src/run_sqlite_analytics.py`
+
+Runs selected SQLite-compatible analytics queries against the local database and exports dashboard-ready CSV outputs.
+
+Input:
+
+```text
+data/database/financial_analytics.db
+```
+
+Output:
+
+```text
+data/analytics/
+```
+
+Generated analytics outputs include:
+
+- `executive_portfolio_kpis.csv`
+- `loan_portfolio_by_status.csv`
+- `payment_status_distribution.csv`
+- `branch_performance.csv`
+- `advisor_performance.csv`
+- `product_performance.csv`
+- `customer_segment_analysis.csv`
+- `monthly_payment_trend.csv`
+- `loan_level_analytics.csv`
+
+These files are generated locally and are not versioned in GitHub because they can be recreated by running the analytics script.
 
 ## SQL Scripts
 
@@ -312,6 +374,44 @@ The project includes technical and business documentation under the `docs/` fold
 | `code_walkthrough.md` | Explains the logic and design decisions behind the code |
 
 ---
+
+### 6. Load processed data into SQLite
+
+```bash
+python src/load_to_sqlite.py
+```
+
+or:
+
+```bash
+py src/load_to_sqlite.py
+```
+
+This creates a local SQLite database at:
+
+```text
+data/database/financial_analytics.db
+```
+
+---
+
+### 7. Run SQLite analytics outputs
+
+```bash
+python src/run_sqlite_analytics.py
+```
+
+or:
+
+```bash
+py src/run_sqlite_analytics.py
+```
+
+This generates analytics-ready CSV outputs under:
+
+```text
+data/analytics/
+```
 
 ## How to Run the Project
 
@@ -434,6 +534,26 @@ Reason:
 Small sample files are included so that reviewers can inspect the structure of the generated data directly in GitHub.
 
 ---
+
+Ignored database outputs:
+
+```text
+data/database/
+```
+
+Reason:
+
+The SQLite database is a generated artifact and can be recreated by running `src/load_to_sqlite.py`.
+
+Ignored analytics outputs:
+
+```text
+data/analytics/
+```
+
+Reason:
+
+Analytics CSV outputs are generated artifacts and can be recreated by running `src/run_sqlite_analytics.py`.
 
 ## Key Data Quality Rules
 

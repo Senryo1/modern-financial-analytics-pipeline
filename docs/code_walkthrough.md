@@ -378,6 +378,101 @@ Validation results printed in the terminal
 
 ---
 
+## `load_to_sqlite.py`
+
+### Purpose
+
+`load_to_sqlite.py` loads processed CSV files into a local SQLite database.
+
+This script introduces a database layer into the project, moving the pipeline beyond file-based processing and into relational data storage.
+
+### Design Decisions
+
+#### 1. SQLite was selected for the local database layer
+
+SQLite was selected because it is lightweight, local, and does not require a separate database server.
+
+This makes the project easier to run while still demonstrating a real database loading pattern.
+
+#### 2. The load process is idempotent
+
+The script uses `if_exists="replace"` when loading tables.
+
+This means the same script can be executed multiple times, and the database will always reflect the latest processed data.
+
+#### 3. Table names match the analytical entities
+
+The SQLite tables are created using business-friendly names:
+
+- `customers`
+- `branches`
+- `advisors`
+- `products`
+- `loans`
+- `payments`
+
+This keeps the database layer aligned with the project’s data dictionary and SQL scripts.
+
+#### 4. Indexes are created for relational access patterns
+
+The script creates indexes on common relationship fields such as:
+
+- `loans.customer_id`
+- `loans.product_id`
+- `loans.branch_id`
+- `loans.advisor_id`
+- `payments.loan_id`
+
+For the sample dataset, performance is not a major issue, but the indexes document the intended join patterns.
+
+---
+
+## `run_sqlite_analytics.py`
+
+### Purpose
+
+`run_sqlite_analytics.py` executes selected analytics queries against the local SQLite database and exports the results as CSV files.
+
+These outputs are designed to support future Power BI reporting.
+
+### Design Decisions
+
+#### 1. Analytics queries are centralized in a Python dictionary
+
+The script stores selected SQL queries in a dictionary where each key becomes the output file name.
+
+This makes the script easy to extend with additional analytical outputs.
+
+#### 2. Outputs are generated as dashboard-ready CSV files
+
+The script writes results to:
+
+```text
+data/analytics/
+```
+
+This creates a clear separation between:
+
+- source tables;
+- analytical logic;
+- reporting outputs.
+
+#### 3. The database is validated before execution
+
+The script checks that the SQLite database exists before running queries.
+
+This helps enforce the correct pipeline order:
+
+```text
+generate → transform → validate → load → analyze
+```
+
+#### 4. The layer prepares the project for BI integration
+
+The generated analytics outputs can be used as direct sources for Power BI while the project is still local.
+
+In future phases, these outputs could be replaced by database views, dbt models, or cloud warehouse tables.
+
 ## Main Design Decisions
 
 ### 5.1 Validation is separated from transformation

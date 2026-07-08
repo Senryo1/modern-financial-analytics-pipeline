@@ -170,6 +170,70 @@ Python validation provides a flexible programmatic layer to identify data qualit
 
 ---
 
+## Local Database Layer
+
+The local database layer loads processed datasets into a SQLite database.
+
+Script:
+
+```text
+src/load_to_sqlite.py
+```
+
+Input:
+
+```text
+data/processed/
+```
+
+Output:
+
+```text
+data/database/financial_analytics.db
+```
+
+Purpose:
+
+This layer demonstrates how processed files can be loaded into a relational database structure for SQL-based analysis.
+
+Design rationale:
+
+SQLite is used as a lightweight local database option because it does not require external infrastructure. It allows the project to demonstrate a database loading layer while keeping the environment simple and reproducible.
+
+Future versions of this layer could be migrated to SQL Server, PostgreSQL, Snowflake, or another cloud data warehouse.
+
+---
+
+## SQLite Analytics Output Layer
+
+The SQLite analytics layer executes selected SQL queries against the local database and exports the results as dashboard-ready CSV files.
+
+Script:
+
+```text
+src/run_sqlite_analytics.py
+```
+
+Input:
+
+```text
+data/database/financial_analytics.db
+```
+
+Output:
+
+```text
+data/analytics/
+```
+
+Purpose:
+
+This layer converts relational database tables into analytics-ready outputs that can be consumed by BI tools such as Power BI.
+
+Design rationale:
+
+The analytics output layer separates source tables from reporting datasets. This makes the pipeline easier to maintain and prepares the project for future dashboard development.
+
 ### 6. SQL Data Quality Layer
 
 Script:
