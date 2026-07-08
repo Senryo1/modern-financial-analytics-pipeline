@@ -33,3 +33,7 @@ data/validation/*
 # Local database outputs
 data/database/*
 !data/database/.gitkeep
+
+# Analytics outputs
+data/analytics/*
+!data/analytics/.gitkeep
