@@ -39,10 +39,10 @@ ANALYTICS_QUERIES = {
         SELECT
             COUNT(*) AS total_loans,
             SUM(loan_amount) AS total_disbursed_amount,
-            AVG(loan_amount) AS average_loan_amount,
+            ROUND(AVG(loan_amount),2) AS average_loan_amount,
             MIN(loan_amount) AS minimum_loan_amount,
             MAX(loan_amount) AS maximum_loan_amount
-        FROM loans;
+        FROM    loans;
     """,
 
     "loan_portfolio_by_status": """
@@ -50,7 +50,7 @@ ANALYTICS_QUERIES = {
             loan_status,
             COUNT(*) AS loan_count,
             SUM(loan_amount) AS total_loan_amount,
-            AVG(loan_amount) AS average_loan_amount
+            ROUND(AVG(loan_amount),2) AS average_loan_amount
         FROM loans
         GROUP BY loan_status
         ORDER BY total_loan_amount DESC;
@@ -61,7 +61,7 @@ ANALYTICS_QUERIES = {
             payment_status,
             COUNT(*) AS payment_count,
             SUM(payment_amount) AS total_payment_amount,
-            AVG(days_late) AS average_days_late
+            ROUND(AVG(days_late),2) AS average_days_late
         FROM payments
         GROUP BY payment_status
         ORDER BY payment_count DESC;
@@ -75,7 +75,7 @@ ANALYTICS_QUERIES = {
             b.city,
             COUNT(l.loan_id) AS loan_count,
             COALESCE(SUM(l.loan_amount), 0) AS total_loan_amount,
-            AVG(l.loan_amount) AS average_loan_amount
+            ROUND(AVG(l.loan_amount),2) AS average_loan_amount
         FROM branches b
         LEFT JOIN loans l
             ON b.branch_id = l.branch_id
@@ -94,7 +94,7 @@ ANALYTICS_QUERIES = {
             b.branch_name,
             COUNT(l.loan_id) AS loan_count,
             COALESCE(SUM(l.loan_amount), 0) AS total_loan_amount,
-            AVG(l.loan_amount) AS average_loan_amount
+            ROUND(AVG(l.loan_amount),2) AS average_loan_amount
         FROM advisors a
         LEFT JOIN branches b
             ON a.branch_id = b.branch_id
@@ -115,7 +115,7 @@ ANALYTICS_QUERIES = {
             p.interest_rate,
             COUNT(l.loan_id) AS loan_count,
             COALESCE(SUM(l.loan_amount), 0) AS total_loan_amount,
-            AVG(l.loan_amount) AS average_loan_amount
+            ROUND(AVG(l.loan_amount),2) AS average_loan_amount
         FROM products p
         LEFT JOIN loans l
             ON p.product_id = l.product_id
@@ -133,7 +133,7 @@ ANALYTICS_QUERIES = {
             COUNT(DISTINCT c.customer_id) AS customer_count,
             COUNT(l.loan_id) AS loan_count,
             COALESCE(SUM(l.loan_amount), 0) AS total_loan_amount,
-            AVG(l.loan_amount) AS average_loan_amount
+            ROUND(AVG(l.loan_amount),2) AS average_loan_amount
         FROM customers c
         LEFT JOIN loans l
             ON c.customer_id = l.customer_id
@@ -146,8 +146,8 @@ ANALYTICS_QUERIES = {
             strftime('%Y-%m-01', payment_date) AS payment_month,
             COUNT(payment_id) AS payment_count,
             SUM(payment_amount) AS total_payment_amount,
-            AVG(payment_amount) AS average_payment_amount,
-            AVG(days_late) AS average_days_late
+            ROUND(AVG(payment_amount),2) AS average_payment_amount,
+            ROUND(AVG(days_late),2) AS average_days_late
         FROM payments
         GROUP BY strftime('%Y-%m-01', payment_date)
         ORDER BY payment_month;
@@ -174,7 +174,7 @@ ANALYTICS_QUERIES = {
             l.loan_status,
             COUNT(pay.payment_id) AS payment_count,
             COALESCE(SUM(pay.payment_amount), 0) AS total_paid_amount,
-            AVG(pay.days_late) AS average_days_late,
+            ROUND(AVG(pay.days_late),2) AS average_days_late,
             SUM(
                 CASE
                     WHEN pay.payment_status = 'Late' THEN 1
@@ -242,7 +242,14 @@ def run_query_to_csv(
     output_path = ANALYTICS_OUTPUT_DIR / f"{query_name}.csv"
 
     df = pd.read_sql_query(query, connection)
-    df.to_csv(output_path, index=False, encoding="utf-8")
+    df.to_csv(
+    output_path,
+    index=False,
+    encoding="utf-8-sig",
+    sep=";",
+    decimal=",",
+    float_format="%.2f",
+)
 
     print(f"Created analytics output: {output_path} ({len(df)} rows)")
 
